@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { authService } from '../../services/auth';
+import { authService } from '@/services/auth';
+import { useAuth } from "@/contexts/AuthContext";
 
 const DEFAULT_ERROR = {
   firstName: "",
@@ -13,6 +14,9 @@ const DEFAULT_ERROR = {
 };
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { signIn } = useAuth();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -70,20 +74,18 @@ export default function Register() {
     try {
       setIsSubmitting(true);
 
-      const userData = await authService.register({
+      const { user, token} = await authService.register({
         firstName,
         lastName,
         email,
         password,
       });
-
-      if (userData.token) {
-        localStorage.setItem('@HelpDesk:token', userData.token);
-      }
+      signIn(user, token);
 
       toast.success("Account created!", {
         description: "Your registration was successful.",
       });
+      navigate("/tickets");
 
     } catch (error: any) {
       const message =

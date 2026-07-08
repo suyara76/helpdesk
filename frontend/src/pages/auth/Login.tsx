@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { authService } from '../../services/auth';
+import { authService } from '@/services/auth';
+import { useAuth } from "@/contexts/AuthContext";
 
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { signIn } = useAuth();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -52,14 +56,11 @@ export default function Login() {
     try {
       setIsSubmitting(true);
 
-      const userData = await authService.login({ email, password });
-
-      if (userData.token) {
-        localStorage.setItem('@HelpDesk:token', userData.token);
-      }
+      const { user, token } = await authService.login({ email, password });
+      signIn(user, token);
 
       toast.success("Welcome back!", { description: "Login successful." });
-
+      navigate("/tickets");
     } catch (error) {
       toast.error("Authentication failed", {
         description: "Invalid email or password. Please try again."
