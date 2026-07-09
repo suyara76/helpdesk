@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Ticket, Clock, CheckCircle2, XCircle, TrendingUp } from "lucide-react";
+import { Headset as HeadsetIcon, Clock, CheckCircle2, XCircle, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { dashboardService } from "@/services/dashboard";
 import { DashboardSummary } from "@/types";
@@ -79,7 +79,7 @@ export default function Dashboard() {
           <SummaryCard
             label="Working"
             value={summary.byStatus.working}
-            icon={Ticket}
+            icon={HeadsetIcon}
             accentClassName="bg-blue-100 text-blue-700"
           />
           <SummaryCard

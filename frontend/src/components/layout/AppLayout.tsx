@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LogOut, LayoutDashboard, Ticket as TicketIcon } from "lucide-react";
+import { LogOut, LayoutDashboard, Headset as HeadsetIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ export function AppLayout() {
 
   const navItems = [
     canViewDashboard && { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/tickets", label: "Tickets", icon: TicketIcon },
+    { to: "/tickets", label: "Tickets", icon: HeadsetIcon },
   ].filter(Boolean) as { to: string; label: string; icon: typeof LayoutDashboard }[];
 
   return (
