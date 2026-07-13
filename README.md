@@ -1,20 +1,48 @@
 # HelpDesk
-A centralized platform for logging, managing, and tracking technical support requests. The system allows customers to submit tickets and track progress in real time, while administrators and agents manage resolutions and view data via an analytics dashboard.
+HelpDesk centralizes support requests into a single platform where users can open tickets, staff can work through them following a strict status lifecycle, and administrators can monitor operational health through a dashboard.
+
+## Features
+
+### Authentication
+- JWT-based login and registration
+- Passwords hashed with bcrypt
+- Inactive accounts are blocked from logging in or creating tickets
+- Protected routes on both frontend and backend
+
+### Users
+- Full CRUD operations
+- Unique email enforcement
+- Soft delete only (users are never physically removed from the database, preserving ticket history)
+
+### Tickets
+- Create, view, edit, list, filter, and sort
+- Tickets are never deleted — full history is preserved
+- Every ticket starts with `PENDING` status automatically
+- Priority levels: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
+- CLIENT users only see their own tickets; ADMIN and AGENT see all tickets
+- Filters: status, priority, creator, creation date range, free-text search
+- Sorting: creation date, last update, title, status
+
+### Dashboard
+- Total ticket count
+- Breakdown by status (pending, working, resolved, cancelled)
+- Tickets created in the last 7 days
+- Tickets resolved in the last 7 days
+- Average resolution time
 
 ### 🚀 Technologies
 
-* **Frontend:** React (Vite), TypeScript, Tailwind CSS, Shadcn/UI, Axios, Lucide Icons, Sonner (Toasts)
-* **Backend:** NestJS, TypeScript, Prisma ORM, Passport JWT, Swagger UI
-* **Database:** PostgreSQL
+* **Frontend:** React (Vite), TypeScript, Tailwind CSS, Shadcn/UI, Axios, Lucide Icons, Sonner (Toasts), React Hook Form
+* **Backend:** NestJS, Prisma ORM, JWT (`@nestjs/jwt`, `passport-jwt`), bcrypt, Swagger UI, PostgreSQL
 
 ### 🔧 Installation & Setup
 
 #### > Prerequisites
-* [Node.js](https://nodejs.org/) (v18 or higher)
-* [npm](https://www.npmjs.com/) (comes with Node)
-* [PostgreSQL](https://www.postgresql.org/)
+* Node.js (LTS recommended)
+* npm
+* PostgreSQL
 
-#### 🖥️ 1. Backend Setup (NestJS)
+#### 🖥️ 1. Backend Setup
 1.1 Navigate to the server directory:
 ```
 cd backend
@@ -44,7 +72,7 @@ npm run start:dev
 ```
 > The backend API will be live at: `http://localhost:3000/api`
 
-#### 💻 2. Frontend Setup (React)
+#### 💻 2. Frontend Setup
 
 2.1 Open a new terminal window
 ```
