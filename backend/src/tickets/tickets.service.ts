@@ -112,7 +112,7 @@ export class TicketsService {
     const isOwner = ticket.usuarioId === requester.userId;
     const isStaff = requester.role === UserRole.ADMIN || requester.role === UserRole.AGENT;
     
-    if(!isOwner && "isStaff"){
+    if(!isOwner && !isStaff){
       throw new ForbiddenException('you cannot view this ticket');
     }
 
