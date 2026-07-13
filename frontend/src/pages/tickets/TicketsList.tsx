@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ticketsService } from "@/services/tickets";
 import { Ticket, TicketStatus } from "@/types";
+import { PriorityBadge } from "@/components/PriorityBadge";
 
 const STATUS_OPTIONS: { value: TicketStatus | ""; label: string }[] = [
   { value: "", label: "All statuses" },
@@ -153,6 +154,7 @@ export default function TicketsList() {
               <tr className="border-b border-slate-200 text-left text-slate-500">
                 <th className="px-4 py-3 font-medium">Title</th>
                 <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Priority</th>
                 <th className="px-4 py-3 font-medium">Created by</th>
                 <th className="px-4 py-3 font-medium">Created at</th>
               </tr>
@@ -173,6 +175,9 @@ export default function TicketsList() {
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={ticket.status} />
+                  </td>
+                  <td className="px-4 py3">
+                    <PriorityBadge priority={ticket.priority}/>
                   </td>
                   <td className="px-4 py-3 text-slate-600">
                     {ticket.usuario

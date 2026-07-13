@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ticketsService } from "@/services/tickets";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ticket, TicketStatus } from "@/types";
+import { PriorityBadge } from "@/components/PriorityBadge";
 
 const ALLOWED_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
   PENDING: ["WORKING", "CANCELLED"],
@@ -148,7 +149,10 @@ export default function TicketDetail() {
               {new Date(ticket.createdAt).toLocaleDateString("en-US")}
             </p>
           </div>
-          <StatusBadge status={ticket.status} />
+          <div className="flex items-center gap-2">
+            <PriorityBadge priority ={ticket.priority} />
+            <StatusBadge status ={ticket.status} />
+          </div>
         </div>
 
         <div>
