@@ -4,31 +4,31 @@ HelpDesk centralizes support requests into a single platform where users can ope
 ## Features
 
 ### Authentication
-- JWT-based login and registration
-- Passwords hashed with bcrypt
-- Inactive accounts are blocked from logging in or creating tickets
-- Protected routes on both frontend and backend
+* JWT-based login and registration
+* Passwords hashed with bcrypt
+* Inactive accounts are blocked from logging in or creating tickets
+* Protected routes on both frontend and backend
 
 ### Users
-- Full CRUD operations
-- Unique email enforcement
-- Soft delete only (users are never physically removed from the database, preserving ticket history)
+* Full CRUD operations
+* Unique email enforcement
+* Soft delete only (users are never physically removed from the database, preserving ticket history)
 
 ### Tickets
-- Create, view, edit, list, filter, and sort
-- Tickets are never deleted — full history is preserved
-- Every ticket starts with `PENDING` status automatically
-- Priority levels: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
-- CLIENT users only see their own tickets; ADMIN and AGENT see all tickets
-- Filters: status, priority, creator, creation date range, free-text search
-- Sorting: creation date, last update, title, status
+* Create, view, edit, list, filter, and sort
+* Tickets are never deleted — full history is preserved
+* Every ticket starts with `PENDING` status automatically
+* Priority levels: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
+* CLIENT users only see their own tickets; ADMIN and AGENT see all tickets
+* Filters: status, priority, creator, creation date range, free-text search
+* Sorting: creation date, last update, title, status
 
 ### Dashboard
-- Total ticket count
-- Breakdown by status (pending, working, resolved, cancelled)
-- Tickets created in the last 7 days
-- Tickets resolved in the last 7 days
-- Average resolution time
+* Total ticket count
+* Breakdown by status (pending, working, resolved, cancelled)
+* Tickets created in the last 7 days
+* Tickets resolved in the last 7 days
+* Average resolution time
 
 ### 🚀 Technologies
 
