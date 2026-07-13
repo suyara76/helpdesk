@@ -1,92 +1,49 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { authService } from '@/services/auth';
+import { authService } from "@/services/auth";
 import { useAuth } from "@/contexts/AuthContext";
 
-const DEFAULT_ERROR = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-};
+interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
 
 export default function Register() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [error, setError] = useState(DEFAULT_ERROR);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    let temErro = false;
-
-    const errors = structuredClone(DEFAULT_ERROR);
-
-    if (!firstName) {
-      errors.firstName = "First name is required.";
-      temErro = true;
-    }
-
-    if (!lastName) {
-      errors.lastName = "Last name is required";
-      temErro = true;
-    }
-
-    if (!email) {
-      errors.email = "Email is required";
-      temErro = true;
-    } else if (!email.includes("@") || !email.includes(".")) {
-      errors.email = "Please enter a valid email";
-      temErro = true;
-    }
-
-    if (!password) {
-      errors.password = "Password is required";
-      temErro = true;
-    } else if (password.length < 6) {
-      errors.password = "Password must be at least 6 characters long";
-      temErro = true;
-    }
-
-    if (temErro) {
-      setError(errors);
-      toast.error("Form error", {
-        description: "Please check the required fields before submitting",
-        icon: <AlertCircle className="w-5 h-5 text-red-500" />,
-      });
-      return;
-    }
-
-    setError(DEFAULT_ERROR);
-
+  const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsSubmitting(true);
 
-      const { user, token} = await authService.register({
-        firstName,
-        lastName,
-        email,
-        password,
+      const { user, token } = await authService.register({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
       });
+
       signIn(user, token);
 
       toast.success("Account created!", {
         description: "Your registration was successful.",
       });
       navigate("/tickets");
-
     } catch (error: any) {
       const message =
         error?.response?.data?.message || "Could not create your account. Please try again.";
@@ -118,23 +75,27 @@ export default function Register() {
             Enter your email and password to sign up!
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Name <span className="text-red-500">*</span>
                 </label>
+
                 <input
                   type="text"
                   placeholder="Enter your first name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${error.firstName ? "border-red-500 focus:ring-red-500" : "border-slate-200"}`}
+                  {...register("firstName", {
+                    required: "First name is required.",
+                  })}
+                  className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
+                    errors.firstName ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                  }`}
                 />
-                {error.firstName && (
+                {errors.firstName && (
                   <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
-                    {error.firstName}
+                    {errors.firstName.message}
                   </p>
                 )}
               </div>
@@ -145,16 +106,18 @@ export default function Register() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Enter your Last name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all
-                    ${error.lastName ? "border-red-500 focus:ring-red-500" : "border-slate-200"}`}
+                  placeholder="Enter your last name"
+                  {...register("lastName", {
+                    required: "Last name is required",
+                  })}
+                  className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
+                    errors.lastName ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                  }`}
                 />
-                {error.lastName && (
+                {errors.lastName && (
                   <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
-                    {error.lastName}
+                    {errors.lastName.message}
                   </p>
                 )}
               </div>
@@ -165,17 +128,23 @@ export default function Register() {
                 Email <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
+                type="email"
                 placeholder="info@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all
-                  ${error.email ? "border-red-500 focus:ring-red-500" : "border-slate-200"}`}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter a valid email",
+                  },
+                })}
+                className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
+                  errors.email ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                }`}
               />
-              {error.email && (
+              {errors.email && (
                 <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
-                  {error.email}
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -188,10 +157,16 @@ export default function Register() {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all pr-11
-                    ${error.password ? "border-red-500 focus:ring-red-500" : "border-slate-200"}`}
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters long",
+                    },
+                  })}
+                  className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all pr-11 ${
+                    errors.password ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                  }`}
                 />
                 <button
                   type="button"
@@ -202,10 +177,10 @@ export default function Register() {
                 </button>
               </div>
 
-              {error.password && (
+              {errors.password && (
                 <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
-                  {error.password}
+                  {errors.password.message}
                 </p>
               )}
             </div>
@@ -223,7 +198,7 @@ export default function Register() {
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-500">
-            Already have an account?{" "}
+            Already have an account? {" "}
             <Link
               to="/"
               className="font-medium text-orange-600 hover:text-orange-400 transition-colors"
@@ -250,5 +225,3 @@ export default function Register() {
     </div>
   );
 }
-
-

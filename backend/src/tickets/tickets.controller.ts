@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -31,21 +21,21 @@ export class TicketsController {
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.CLIENT)
   @ApiOperation({ summary: 'Create a new ticket' })
   create(@Req() req, @Body() dto: CreateTicketDto) {
-    return this.ticketsService.create(req.user.userId, dto);
+    return this.ticketsService.create(req.user, dto);
   }
 
   @Get()
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.CLIENT)
   @ApiOperation({ summary: 'List tickets with filters, sorting and pagination' })
-  findAll(@Query() query: QueryTicketsDto) {
-    return this.ticketsService.findAll(query);
+  findAll(@Req()req, @Query() query: QueryTicketsDto) {
+    return this.ticketsService.findAll(req.user, query);
   }
 
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.CLIENT)
   @ApiOperation({ summary: 'Get ticket details by id' })
-  findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req) {
+    return this.ticketsService.findOne(id, req.user);
   }
 
   @Patch(':id')
@@ -58,7 +48,7 @@ export class TicketsController {
   @Patch(':id/status')
   @Roles(UserRole.ADMIN, UserRole.AGENT)
   @ApiOperation({ summary: 'Update ticket status (Admin/Agent only)' })
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateTicketStatusDto) {
-    return this.ticketsService.updateStatus(id, dto);
+  updateStatus(@Param('id') id: string, @Req() req, @Body() dto: UpdateTicketStatusDto) {
+    return this.ticketsService.updateStatus(id, dto, req.user);
   }
 }

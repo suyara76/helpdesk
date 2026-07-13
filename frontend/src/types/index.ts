@@ -1,4 +1,5 @@
 export type UserRole = "ADMIN" | "AGENT" | "CLIENT";
+export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 export interface User {
   id: string;
@@ -18,6 +19,7 @@ export interface Ticket {
   titulo: string;
   descricao: string;
   status: TicketStatus;
+  priority: TicketPriority;
   usuarioId: string;
   usuario?: Pick<User, "id" | "firstName" | "lastName" | "email">;
   createdAt: string;

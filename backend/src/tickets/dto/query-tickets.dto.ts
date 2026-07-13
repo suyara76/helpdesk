@@ -1,7 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, Min, isDateString } from 'class-validator';
 import { TicketStatus } from '@prisma/client';
+import { TicketPriority } from '@prisma/client';
 
 export class QueryTicketsDto {
   @ApiPropertyOptional({ enum: TicketStatus })
@@ -9,20 +10,30 @@ export class QueryTicketsDto {
   @IsEnum(TicketStatus)
   status?: TicketStatus;
 
-  @ApiPropertyOptional({ description: 'ID do usuário que criou o chamado' })
+  @ApiPropertyOptional({ description: 'Id of the user who created the ticket' })
   @IsOptional()
   @IsString()
   usuarioId?: string;
 
-  @ApiPropertyOptional({ description: 'Busca livre no título e descrição' })
+  @ApiPropertyOptional({ description: 'free text search in title and description' })
   @IsOptional()
   @IsString()
   search?: string;
 
+  @ApiPropertyOptional({description: 'Only tickets created on or after this date (ISO 8601)' })
+  @IsOptional()
+  @IsDateString()
+  createdAfter?: string;
+
+  @ApiPropertyOptional({description: 'Only tickets created on or after this date (ISO 8601)' })
+  @IsOptional()
+  @IsDateString()
+  createdBefore?: string;
+
   @ApiPropertyOptional({ enum: ['createdAt', 'updatedAt', 'titulo', 'status'] })
   @IsOptional()
   @IsIn(['createdAt', 'updatedAt', 'titulo', 'status'])
-  sortBy?: string = 'createdAt';
+  sortBy?: string = 'createdAt'; 
 
   @ApiPropertyOptional({ enum: ['asc', 'desc'] })
   @IsOptional()
@@ -42,4 +53,9 @@ export class QueryTicketsDto {
   @IsInt()
   @Min(1)
   limit?: number = 10;
+
+  @ApiPropertyOptional({ enum: TicketPriority })
+  @IsOptional()
+  @IsEnum(TicketPriority)
+  priority?: TicketPriority;
 }

@@ -34,13 +34,21 @@ model User {
   tickets Ticket[]
 }
 
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model Ticket {
-  id          String       @id @default(uuid())
+  id          String           @id @default(uuid())
   titulo      String
   descricao   String
-  status      TicketStatus @default(PENDING)
+  status      TicketStatus     @default(PENDING)
+  priority    TicketPriority   @default(MEDIUM)
   usuarioId   String
-  usuario     User         @relation(fields: [usuarioId], references: [id])
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  usuario     User             @relation(fields: [usuarioId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }

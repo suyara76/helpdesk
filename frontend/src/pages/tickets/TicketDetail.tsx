@@ -1,9 +1,9 @@
+import { StatusBadge } from "@/components/StatusBadge";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/StatusBadge";
 import { ticketsService } from "@/services/tickets";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ticket, TicketStatus } from "@/types";

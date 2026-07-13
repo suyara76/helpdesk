@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -57,6 +53,10 @@ export class AuthService {
 
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (!user.ativo) {
+      throw new UnauthorizedException('User is inactive');
     }
 
     const { password, ...userWithoutPassword } = user;

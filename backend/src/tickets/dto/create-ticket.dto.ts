@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { TicketPriority } from '@prisma/client';
 
 export class CreateTicketDto {
   @ApiProperty({ example: 'Impressora não funciona' })
@@ -11,4 +12,9 @@ export class CreateTicketDto {
   @IsNotEmpty({ message: 'Description is required' })
   @IsString()
   descricao!: string;
+
+  @ApiPropertyOptional({ enum: TicketPriority, example: TicketPriority.MEDIUM })
+  @IsOptional()
+  @IsEnum(TicketPriority, { message: 'Invalid priority'})
+  priority?: TicketPriority;
 }

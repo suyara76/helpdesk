@@ -10,7 +10,7 @@ const STATUS_STYLES: Record<TicketStatus, string> = {
 
 const STATUS_LABELS: Record<TicketStatus, string> = {
   PENDING: "Pending",
-  WORKING: "Working",
+  WORKING: "In Progress",
   RESOLVED: "Resolved",
   CANCELLED: "Cancelled",
 };

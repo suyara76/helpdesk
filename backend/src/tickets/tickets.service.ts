@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -19,32 +14,55 @@ const ALLOWED_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
   CANCELLED: [],
 };
 
+interface Requester {
+  userId: string;
+  role: UserRole;
+}
+
 @Injectable()
 export class TicketsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(usuarioId: string, dto: CreateTicketDto) {
+  async create(requester: Requester, dto: CreateTicketDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: requester.userId },
+    });
+    
+    if (!user || !user.ativo){
+      throw new ForbiddenException ('Inactive users cannot create tickets');
+    }
+
     return this.prisma.ticket.create({
       data: {
         titulo: dto.titulo,
         descricao: dto.descricao,
-        usuarioId,
+        priority: dto.priority ?? 'MEDIUM',
+        usuarioId:requester.userId,
         status: TicketStatus.PENDING,
       },
     });
   }
 
-  async findAll(query: QueryTicketsDto) {
-    const { status, usuarioId, search, sortBy, order, page, limit } = query;
+  async findAll(requester: Requester, query: QueryTicketsDto) {
+    const { status, usuarioId, search, sortBy, order, page, limit, createdAfter, createdBefore, priority } = query;
+
+    const ownerFilter = requester.role === UserRole.CLIENT ? requester.userId: usuarioId;
 
     const where: Prisma.TicketWhereInput = {
       ...(status && { status }),
-      ...(usuarioId && { usuarioId }),
+      ...(priority && { priority }),
+      ...(ownerFilter && {usuarioId: ownerFilter }),
       ...(search && {
         OR: [
           { titulo: { contains: search, mode: 'insensitive' } },
           { descricao: { contains: search, mode: 'insensitive' } },
         ],
+      }),
+      ...((createdAfter || createdBefore) &&{
+        createdAt: {
+          ...(createdAfter && { gte: new Date(createdAfter) }),
+          ...(createdBefore && {lte: new Date(createdBefore) }),
+        },
       }),
     };
 
@@ -77,7 +95,7 @@ export class TicketsService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requester: Requester) {
     const ticket = await this.prisma.ticket.findUnique({
       where: { id },
       include: {
@@ -91,17 +109,19 @@ export class TicketsService {
       throw new NotFoundException('Ticket not found');
     }
 
+    const isOwner = ticket.usuarioId === requester.userId;
+    const isStaff = requester.role === UserRole.ADMIN || requester.role === UserRole.AGENT;
+    
+    if(!isOwner && "isStaff"){
+      throw new ForbiddenException('you cannot view this ticket');
+    }
+
     return ticket;
   }
 
-  async update(
-    id: string,
-    dto: UpdateTicketDto,
-    requester: { userId: string; role: UserRole },
-  ) {
-    const ticket = await this.findOne(id);
+  async update(id: string, dto: UpdateTicketDto, requester: Requester) {
+    const ticket = await this.findOne(id, requester);
 
-    // Só o dono do chamado ou ADMIN/AGENT podem editar título/descrição
     const isOwner = ticket.usuarioId === requester.userId;
     const isStaff = requester.role === UserRole.ADMIN || requester.role === UserRole.AGENT;
 
@@ -115,8 +135,8 @@ export class TicketsService {
     });
   }
 
-  async updateStatus(id: string, dto: UpdateTicketStatusDto) {
-    const ticket = await this.findOne(id);
+  async updateStatus(id: string, dto: UpdateTicketStatusDto, requester: Requester) {
+    const ticket = await this.findOne(id, requester);
 
     const allowedNext = ALLOWED_TRANSITIONS[ticket.status];
 

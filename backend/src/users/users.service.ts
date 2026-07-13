@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -87,7 +83,7 @@ export class UsersService {
   async remove(id: string) {
     await this.findOne(id);
 
-    // Soft delete: apenas marca como inativo, nunca remove fisicamente
+    //soft delete only - users w ticket must never be physically removed
     const user = await this.prisma.user.update({
       where: { id },
       data: { ativo: false },

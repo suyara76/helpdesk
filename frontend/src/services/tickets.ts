@@ -1,8 +1,9 @@
 import { api } from "./api";
-import { Ticket, PaginatedResponse, TicketStatus } from "@/types";
+import { Ticket, PaginatedResponse, TicketStatus, TicketPriority } from "@/types";
 
 export interface TicketFilters {
   status?: TicketStatus;
+  priority?: TicketPriority;
   search?: string;
   sortBy?: "createdAt" | "updatedAt" | "titulo" | "status";
   order?: "asc" | "desc";
@@ -13,6 +14,7 @@ export interface TicketFilters {
 export interface CreateTicketData {
   titulo: string;
   descricao: string;
+  priority?: TicketPriority;
 }
 
 export interface UpdateTicketData {

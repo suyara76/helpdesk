@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/ui/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
@@ -9,6 +8,7 @@ import Dashboard from "@/pages/dashboard/Dashboard";
 import TicketsList from "@/pages/tickets/TicketsList";
 import CreateTicket from "@/pages/tickets/CreateTicket";
 import TicketDetail from "@/pages/tickets/TicketDetail";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
         <Toaster richColors position="top-right" />
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/Register" element={<Register />} />
+          <Route path="/register" element={<Register />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>

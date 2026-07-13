@@ -1,59 +1,55 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ticketsService } from "@/services/tickets";
+import { TicketPriority } from "@/types";
 
-const DEFAULT_ERRORS = { titulo: "", descricao: "" };
+interface CreateTicketFormData {
+  titulo: string;
+  descricao: string;
+  priority: TicketPriority;
+}
+
+const PRIORITY_OPTIONS: { value: TicketPriority; label: string }[] = [
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
+  { value: "CRITICAL", label: "Critical" },
+];
 
 export default function CreateTicket() {
   const navigate = useNavigate();
 
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [errors, setErrors] = useState(DEFAULT_ERRORS);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateTicketFormData>({
+    defaultValues: { priority: "MEDIUM" },
+  });
 
-    const newErrors = { ...DEFAULT_ERRORS };
-    let hasError = false;
-
-    if (!titulo.trim()) {
-      newErrors.titulo = "Title is required";
-      hasError = true;
-    }
-
-    if (!descricao.trim()) {
-      newErrors.descricao = "Description is required";
-      hasError = true;
-    }
-
-    if (hasError) {
-      setErrors(newErrors);
-      toast.error("Form error", {
-        description: "Please check the required fields before submitting",
-        icon: <AlertCircle className="w-5 h-5 text-red-500" />,
-      });
-      return;
-    }
-
-    setErrors(DEFAULT_ERRORS);
-
+  async function onSubmit(data: CreateTicketFormData) {
     try {
       setIsSubmitting(true);
-      const ticket = await ticketsService.create({ titulo, descricao });
+      const ticket = await ticketsService.create(data);
 
       toast.success("Ticket created!", {
         description: "Your request has been submitted successfully.",
       });
 
       navigate(`/tickets/${ticket.id}`);
-    } catch (error) {
+    } catch (error: any) {
+      const isInactive = error?.response?.data?.message === "Inactive users cannot create tickets";
+
       toast.error("Failed to create ticket", {
-        description: "Please try again in a few moments.",
+        description: isInactive
+          ? "Your account is inactive and cannot create new tickets."
+          : "Please try again in a few moments.",
       });
       console.error("Failed to create ticket:", error);
     } finally {
@@ -77,7 +73,7 @@ export default function CreateTicket() {
           Describe your issue and our support team will take care of it.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Title <span className="text-red-500">*</span>
@@ -85,8 +81,7 @@ export default function CreateTicket() {
             <input
               type="text"
               placeholder="e.g. Printer is not working"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
+              {...register("titulo", { required: "Title is required" })}
               className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
                 errors.titulo ? "border-red-500 focus:ring-red-500" : "border-slate-200"
               }`}
@@ -94,9 +89,25 @@ export default function CreateTicket() {
             {errors.titulo && (
               <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" />
-                {errors.titulo}
+                {errors.titulo.message}
               </p>
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              Priority
+            </label>
+            <select
+              {...register("priority")}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
+            >
+              {PRIORITY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -106,8 +117,7 @@ export default function CreateTicket() {
             <textarea
               rows={5}
               placeholder="Provide as much detail as possible..."
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
+              {...register("descricao", { required: "Description is required" })}
               className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all resize-none ${
                 errors.descricao ? "border-red-500 focus:ring-red-500" : "border-slate-200"
               }`}
@@ -115,7 +125,7 @@ export default function CreateTicket() {
             {errors.descricao && (
               <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" />
-                {errors.descricao}
+                {errors.descricao.message}
               </p>
             )}
           </div>
