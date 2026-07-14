@@ -28,8 +28,9 @@ export class UsersService {
       },
     });
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    // const { password, ...userWithoutPassword } = user;
+    Reflect.deleteProperty(user, 'password');
+    return user;
   }
 
   async findAll() {

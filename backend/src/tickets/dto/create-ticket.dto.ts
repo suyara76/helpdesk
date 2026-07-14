@@ -8,13 +8,15 @@ export class CreateTicketDto {
   @IsString()
   titulo!: string;
 
-  @ApiProperty({ example: 'A impressora do setor financeiro não liga desde ontem.' })
+  @ApiProperty({
+    example: 'A impressora do setor financeiro não liga desde ontem.',
+  })
   @IsNotEmpty({ message: 'Description is required' })
   @IsString()
   descricao!: string;
 
   @ApiPropertyOptional({ enum: TicketPriority, example: TicketPriority.MEDIUM })
   @IsOptional()
-  @IsEnum(TicketPriority, { message: 'Invalid priority'})
+  @IsEnum(TicketPriority, { message: 'Invalid priority' })
   priority?: TicketPriority;
 }

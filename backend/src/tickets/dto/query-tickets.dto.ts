@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, Min, isDateString } from 'class-validator';
+import { IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { TicketStatus } from '@prisma/client';
 import { TicketPriority } from '@prisma/client';
 
@@ -15,17 +15,23 @@ export class QueryTicketsDto {
   @IsString()
   usuarioId?: string;
 
-  @ApiPropertyOptional({ description: 'free text search in title and description' })
+  @ApiPropertyOptional({
+    description: 'free text search in title and description',
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({description: 'Only tickets created on or after this date (ISO 8601)' })
+  @ApiPropertyOptional({
+    description: 'Only tickets created on or after this date (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   createdAfter?: string;
 
-  @ApiPropertyOptional({description: 'Only tickets created on or after this date (ISO 8601)' })
+  @ApiPropertyOptional({
+    description: 'Only tickets created on or after this date (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   createdBefore?: string;
@@ -33,7 +39,7 @@ export class QueryTicketsDto {
   @ApiPropertyOptional({ enum: ['createdAt', 'updatedAt', 'titulo', 'status'] })
   @IsOptional()
   @IsIn(['createdAt', 'updatedAt', 'titulo', 'status'])
-  sortBy?: string = 'createdAt'; 
+  sortBy?: string = 'createdAt';
 
   @ApiPropertyOptional({ enum: ['asc', 'desc'] })
   @IsOptional()

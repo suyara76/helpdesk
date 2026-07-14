@@ -40,9 +40,7 @@ export class DashboardService {
       }),
     ]);
 
-    const averageResolutionTimeInHours = this.calculateAverageResolutionTime(
-      resolvedTickets,
-    );
+    const averageResolutionTimeInHours = this.calculateAverageResolutionTime(resolvedTickets);
 
     return {
       total,

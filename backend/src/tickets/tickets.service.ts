@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -6,6 +11,7 @@ import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto';
 import { QueryTicketsDto } from './dto/query-tickets.dto';
 import { TicketStatus } from '@prisma/client';
+import { UserAuth } from '../auth/interfaces/UserAuth';
 
 const ALLOWED_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
   PENDING: [TicketStatus.WORKING, TicketStatus.CANCELLED],
@@ -14,22 +20,17 @@ const ALLOWED_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
   CANCELLED: [],
 };
 
-interface Requester {
-  userId: string;
-  role: UserRole;
-}
-
 @Injectable()
 export class TicketsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(requester: Requester, dto: CreateTicketDto) {
+  async create(requester: UserAuth, dto: CreateTicketDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: requester.userId },
     });
-    
-    if (!user || !user.ativo){
-      throw new ForbiddenException ('Inactive users cannot create tickets');
+
+    if (!user || !user.ativo) {
+      throw new ForbiddenException('Inactive users cannot create tickets');
     }
 
     return this.prisma.ticket.create({
@@ -37,31 +38,42 @@ export class TicketsService {
         titulo: dto.titulo,
         descricao: dto.descricao,
         priority: dto.priority ?? 'MEDIUM',
-        usuarioId:requester.userId,
+        usuarioId: requester.userId,
         status: TicketStatus.PENDING,
       },
     });
   }
 
-  async findAll(requester: Requester, query: QueryTicketsDto) {
-    const { status, usuarioId, search, sortBy, order, page, limit, createdAfter, createdBefore, priority } = query;
+  async findAll(requester: UserAuth, query: QueryTicketsDto) {
+    const {
+      status,
+      usuarioId,
+      search,
+      sortBy,
+      order,
+      page,
+      limit,
+      createdAfter,
+      createdBefore,
+      priority,
+    } = query;
 
-    const ownerFilter = requester.role === UserRole.CLIENT ? requester.userId: usuarioId;
+    const ownerFilter = requester.role === UserRole.CLIENT ? requester.userId : usuarioId;
 
     const where: Prisma.TicketWhereInput = {
       ...(status && { status }),
       ...(priority && { priority }),
-      ...(ownerFilter && {usuarioId: ownerFilter }),
+      ...(ownerFilter && { usuarioId: ownerFilter }),
       ...(search && {
         OR: [
           { titulo: { contains: search, mode: 'insensitive' } },
           { descricao: { contains: search, mode: 'insensitive' } },
         ],
       }),
-      ...((createdAfter || createdBefore) &&{
+      ...((createdAfter || createdBefore) && {
         createdAt: {
           ...(createdAfter && { gte: new Date(createdAfter) }),
-          ...(createdBefore && {lte: new Date(createdBefore) }),
+          ...(createdBefore && { lte: new Date(createdBefore) }),
         },
       }),
     };
@@ -95,7 +107,7 @@ export class TicketsService {
     };
   }
 
-  async findOne(id: string, requester: Requester) {
+  async findOne(id: string, requester: UserAuth) {
     const ticket = await this.prisma.ticket.findUnique({
       where: { id },
       include: {
@@ -111,15 +123,15 @@ export class TicketsService {
 
     const isOwner = ticket.usuarioId === requester.userId;
     const isStaff = requester.role === UserRole.ADMIN || requester.role === UserRole.AGENT;
-    
-    if(!isOwner && !isStaff){
+
+    if (!isOwner && !isStaff) {
       throw new ForbiddenException('you cannot view this ticket');
     }
 
     return ticket;
   }
 
-  async update(id: string, dto: UpdateTicketDto, requester: Requester) {
+  async update(id: string, dto: UpdateTicketDto, requester: UserAuth) {
     const ticket = await this.findOne(id, requester);
 
     const isOwner = ticket.usuarioId === requester.userId;
@@ -135,15 +147,13 @@ export class TicketsService {
     });
   }
 
-  async updateStatus(id: string, dto: UpdateTicketStatusDto, requester: Requester) {
+  async updateStatus(id: string, dto: UpdateTicketStatusDto, requester: UserAuth) {
     const ticket = await this.findOne(id, requester);
 
     const allowedNext = ALLOWED_TRANSITIONS[ticket.status];
 
     if (!allowedNext.includes(dto.status)) {
-      throw new BadRequestException(
-        `Cannot change status from ${ticket.status} to ${dto.status}`,
-      );
+      throw new BadRequestException(`Cannot change status from ${ticket.status} to ${dto.status}`);
     }
 
     return this.prisma.ticket.update({
