@@ -8,6 +8,7 @@ import { AlertDialog } from "@/components/AlertDialog";
 import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth";
 import { useAuth } from "@/contexts/AuthContext";
+import axios from "axios";
 
 interface LoginFormData {
   email: string;
@@ -37,18 +38,20 @@ export default function Login() {
 
       toast.success("Welcome back!", { description: "Login successful." });
       navigate("/tickets");
-    } catch (error: any) {
-      const isInactive = error?.response?.data?.message === "User is inactive";
-
-      if (isInactive) {
-        setShowInactiveDialog(true);
-      } else {
-        toast.error("Authentication failed", {
-          description: "Invalid email or password. Please try again.",
-        });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const isInactive = error?.response?.data?.message === "User is inactive";
+  
+        if (isInactive) {
+          setShowInactiveDialog(true);
+        } else {
+          toast.error("Authentication failed", {
+            description: "Invalid email or password. Please try again.",
+          });
+        }
+  
+        console.error("Login failed:", error);
       }
-
-      console.error("Login failed:", error);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,5 @@
 import { StatusBadge } from "@/components/StatusBadge";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
@@ -36,36 +36,34 @@ export default function TicketsList() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const fetchTickets = useCallback(async () => {
-    try {
-      setIsLoading(true);
-
-      const response = await ticketsService.list({
-        search: search || undefined,
-        status: status || undefined,
-        sortBy: sortBy as TicketFiltersSortBy,
-        order,
-        page,
-        limit: 10,
-      });
-
-      setTickets(response.data);
-      setTotalPages(response.meta.totalPages || 1);
-      setTotal(response.meta.total);
-    } catch (error) {
-      toast.error("Failed to load tickets", {
-        description: "Please try again in a few moments.",
-      });
-      console.error("Failed to load tickets:", error);
-    } finally {
-      setIsLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, status, sortBy, order, page]);
-
   useEffect(() => {
+    async function fetchTickets() {
+      try {
+        setIsLoading(true);
+
+        const response = await ticketsService.list({
+          search: search || undefined,
+          status: status || undefined,
+          sortBy: sortBy as TicketFiltersSortBy,
+          order,
+          page,
+          limit: 10,
+        });
+
+        setTickets(response.data);
+        setTotalPages(response.meta.totalPages || 1);
+        setTotal(response.meta.total);
+      } catch (error) {
+        toast.error("Failed to load tickets", {
+          description: "Please try again in a few moments.",
+        });
+        console.error("Failed to load tickets:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchTickets();
-  }, [fetchTickets]);
+  }, [search, status, sortBy, order, page]);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -177,7 +175,7 @@ export default function TicketsList() {
                     <StatusBadge status={ticket.status} />
                   </td>
                   <td className="px-4 py3">
-                    <PriorityBadge priority={ticket.priority}/>
+                    <PriorityBadge priority={ticket.priority} />
                   </td>
                   <td className="px-4 py-3 text-slate-600">
                     {ticket.usuario

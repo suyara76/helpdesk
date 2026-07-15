@@ -1,5 +1,5 @@
 import { StatusBadge } from "@/components/StatusBadge";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -41,28 +41,29 @@ export default function TicketDetail() {
   const isOwner = ticket?.usuarioId === user?.id;
   const canEdit = isOwner || canManageStatus;
 
-  const fetchTicket = useCallback(async () => {
-    if (!id) return;
-
-    try {
-      setIsLoading(true);
-      const data = await ticketsService.getById(id);
-      setTicket(data);
-      setTitulo(data.titulo);
-      setDescricao(data.descricao);
-    } catch (error) {
-      toast.error("Failed to load ticket", {
-        description: "The ticket may not exist or you may not have access to it.",
-      });
-      navigate("/tickets");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [id, navigate]);
-
   useEffect(() => {
+    async function fetchTicket() {
+      if (!id) return;
+
+      try {
+        setIsLoading(true);
+        const data = await ticketsService.getById(id);
+        setTicket(data);
+        setTitulo(data.titulo);
+        setDescricao(data.descricao);
+      } catch {
+        toast.error("Failed to load ticket", {
+          description:
+            "The ticket may not exist or you may not have access to it.",
+        });
+        navigate("/tickets");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
     fetchTicket();
-  }, [fetchTicket]);
+  }, [id, navigate]);
 
   async function handleSave() {
     if (!id) return;
@@ -142,21 +143,25 @@ export default function TicketDetail() {
                 className="w-full text-xl font-bold text-slate-900 border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             ) : (
-              <h1 className="text-xl font-bold text-slate-900">{ticket.titulo}</h1>
+              <h1 className="text-xl font-bold text-slate-900">
+                {ticket.titulo}
+              </h1>
             )}
             <p className="text-xs text-slate-400 mt-2">
-              Opened by {ticket.usuario?.firstName} {ticket.usuario?.lastName} on{" "}
-              {new Date(ticket.createdAt).toLocaleDateString("en-US")}
+              Opened by {ticket.usuario?.firstName} {ticket.usuario?.lastName}{" "}
+              on {new Date(ticket.createdAt).toLocaleDateString("en-US")}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <PriorityBadge priority ={ticket.priority} />
-            <StatusBadge status ={ticket.status} />
+            <PriorityBadge priority={ticket.priority} />
+            <StatusBadge status={ticket.status} />
           </div>
         </div>
 
         <div>
-          <h2 className="text-sm font-medium text-slate-700 mb-2">Description</h2>
+          <h2 className="text-sm font-medium text-slate-700 mb-2">
+            Description
+          </h2>
           {isEditing ? (
             <textarea
               rows={5}
@@ -197,7 +202,11 @@ export default function TicketDetail() {
                 </Button>
               </>
             ) : (
-              <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+              >
                 Edit ticket
               </Button>
             )}
@@ -207,7 +216,9 @@ export default function TicketDetail() {
 
       {canManageStatus && nextStatuses.length > 0 && (
         <div className="bg-white border border-slate-200 rounded-lg p-6">
-          <h2 className="text-sm font-medium text-slate-700 mb-3">Update status</h2>
+          <h2 className="text-sm font-medium text-slate-700 mb-3">
+            Update status
+          </h2>
           <div className="flex flex-wrap gap-3">
             {nextStatuses.map((status) => (
               <Button

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/services/auth";
 import { useAuth } from "@/contexts/AuthContext";
+import axios from "axios";
 
 interface RegisterFormData {
   firstName: string;
@@ -44,14 +45,17 @@ export default function Register() {
         description: "Your registration was successful.",
       });
       navigate("/tickets");
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message || "Could not create your account. Please try again.";
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error?.response?.data?.message ||
+          "Could not create your account. Please try again.";
 
-      toast.error("Registration failed", {
-        description: Array.isArray(message) ? message[0] : message,
-      });
-      console.error("Registration failed:", error);
+        toast.error("Registration failed", {
+          description: Array.isArray(message) ? message[0] : message,
+        });
+        console.error("Registration failed:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -70,7 +74,9 @@ export default function Register() {
         </div>
 
         <div className="w-full max-w-md mx-auto">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Sign Up</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
+            Sign Up
+          </h1>
           <p className="text-sm text-slate-500 mb-8">
             Enter your email and password to sign up!
           </p>
@@ -89,7 +95,9 @@ export default function Register() {
                     required: "First name is required.",
                   })}
                   className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
-                    errors.firstName ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                    errors.firstName
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-slate-200"
                   }`}
                 />
                 {errors.firstName && (
@@ -111,7 +119,9 @@ export default function Register() {
                     required: "Last name is required",
                   })}
                   className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
-                    errors.lastName ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                    errors.lastName
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-slate-200"
                   }`}
                 />
                 {errors.lastName && (
@@ -138,7 +148,9 @@ export default function Register() {
                   },
                 })}
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
-                  errors.email ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                  errors.email
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-slate-200"
                 }`}
               />
               {errors.email && (
@@ -165,7 +177,9 @@ export default function Register() {
                     },
                   })}
                   className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all pr-11 ${
-                    errors.password ? "border-red-500 focus:ring-red-500" : "border-slate-200"
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-slate-200"
                   }`}
                 />
                 <button
@@ -173,7 +187,11 @@ export default function Register() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="cursor-pointer absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
@@ -198,7 +216,7 @@ export default function Register() {
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-500">
-            Already have an account? {" "}
+            Already have an account?{" "}
             <Link
               to="/"
               className="font-medium text-orange-600 hover:text-orange-400 transition-colors"
@@ -216,9 +234,12 @@ export default function Register() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-400 text-white font-bold text-2xl shadow-xl mb-6">
             HD
           </div>
-          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">HelpDesk</h2>
+          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">
+            HelpDesk
+          </h2>
           <p className="text-slate-400 text-sm leading-relaxed">
-            A centralized platform for logging and tracking technical support requests
+            A centralized platform for logging and tracking technical support
+            requests
           </p>
         </div>
       </div>

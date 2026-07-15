@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ticketsService } from "@/services/tickets";
 import { TicketPriority } from "@/types";
+import axios from "axios";
 
 interface CreateTicketFormData {
   titulo: string;
@@ -43,15 +44,17 @@ export default function CreateTicket() {
       });
 
       navigate(`/tickets/${ticket.id}`);
-    } catch (error: any) {
-      const isInactive = error?.response?.data?.message === "Inactive users cannot create tickets";
-
-      toast.error("Failed to create ticket", {
-        description: isInactive
-          ? "Your account is inactive and cannot create new tickets."
-          : "Please try again in a few moments.",
-      });
-      console.error("Failed to create ticket:", error);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const isInactive = error?.response?.data?.message === "Inactive users cannot create tickets";
+  
+        toast.error("Failed to create ticket", {
+          description: isInactive
+            ? "Your account is inactive and cannot create new tickets."
+            : "Please try again in a few moments.",
+        });
+        console.error("Failed to create ticket:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }
